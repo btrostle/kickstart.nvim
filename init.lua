@@ -99,7 +99,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = true
+  vim.g.have_nerd_font = false
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  vim.o.relativenumber = true
+  -- vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -140,9 +140,8 @@ do
   -- Decrease update time
   vim.o.updatetime = 250
 
-  -- Wait for mapped key sequences until they are completed or canceled.
-  vim.o.timeout = false
-  vim.o.ttimeout = true
+  -- Decrease mapped sequence wait time
+  vim.o.timeoutlen = 300
 
   -- Configure how new splits should be opened
   vim.o.splitright = true
@@ -172,6 +171,7 @@ do
   -- instead raise a dialog asking if you wish to save the current file(s)
   -- See `:help 'confirm'`
   vim.o.confirm = true
+  require 'custom.options'
 end
 
 -- ============================================================
@@ -226,14 +226,8 @@ do
   -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
   -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
-  -- Keybinds to make split navigation easier.
-  --  Use CTRL+<hjkl> to switch between windows
-  --
-  --  See `:help wincmd` for a list of all window commands
-  vim.keymap.set('n', '<A-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-  vim.keymap.set('n', '<A-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-  vim.keymap.set('n', '<A-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-  vim.keymap.set('n', '<A-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+  -- Custom split navigation mappings.
+  require 'custom.keymaps'
 
   -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
   -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -418,24 +412,8 @@ do
     },
   }
 
-  -- [[ Colorscheme ]]
-  -- You can easily change to a different colorscheme.
-  -- Change the name of the colorscheme plugin below, and then
-  -- change the command under that to load whatever the name of that colorscheme is.
-  --
-  -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  vim.pack.add { gh 'neanias/everforest-nvim', gh 'tpope/vim-commentary' }
-  ---@diagnostic disable-next-line: missing-fields
-  require('everforest').setup {
-    background = 'hard',
-    styles = {
-      comments = { italic = false }, -- Disable italics in comments
-    },
-  }
-
-  -- Load the colorscheme here.
-  vim.o.background = 'dark'
-  vim.cmd.colorscheme 'everforest'
+  require 'custom.plugins.everforest'
+  require 'custom.plugins.commentary'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -525,8 +503,6 @@ do
     gh 'nvim-lua/plenary.nvim',
     gh 'nvim-telescope/telescope.nvim',
     gh 'nvim-telescope/telescope-ui-select.nvim',
-    gh 'nvim-telescope/telescope-file-browser.nvim',
-    gh 'nvim-tree/nvim-web-devicons',
   }
   if vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
 
@@ -552,15 +528,7 @@ do
   -- Enable Telescope extensions if they are installed
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
-  pcall(require('telescope').load_extension, 'file_browser')
-  vim.keymap.set('n', '<leader>fb', function()
-    require('telescope').extensions.file_browser.file_browser {
-      path = vim.fn.expand '%:p:h',
-      hidden = true,
-      grouped = true,
-      respect_gitignore = false,
-    }
-  end, { desc = '[F]ile [B]rowser' })
+  require 'custom.plugins.file_browser'
 
   -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
@@ -668,8 +636,7 @@ do
   -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
   -- and elegantly composed help section, `:help lsp-vs-treesitter`
 
-  vim.pack.add { gh 'folke/lazydev.nvim' }
-  require('lazydev').setup { library = { { path = '${3rd}/luv/library', words = { 'vim%.uv' } } } }
+  require 'custom.plugins.lazydev'
 
   -- Useful status updates for LSP.
   vim.pack.add { gh 'j-hui/fidget.nvim' }
@@ -750,7 +717,7 @@ do
   local servers = {
     -- clangd = {},
     -- gopls = {},
-    pyright = {},
+    -- pyright = {},
     -- tsc = {},
     --
     -- Some languages (like rust) have entire language plugins that can be useful:
@@ -816,6 +783,7 @@ do
   --    :Mason
   --
   -- You can press `g?` for help in this menu.
+  servers = vim.tbl_extend('force', servers, require 'custom.servers')
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
@@ -920,7 +888,7 @@ do
     appearance = {
       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
-      nerd_font_variant = 'normal',
+      nerd_font_variant = require('custom.completion').appearance.nerd_font_variant,
     },
 
     completion = {
@@ -929,10 +897,7 @@ do
       documentation = { auto_show = false, auto_show_delay_ms = 500 },
     },
 
-    sources = {
-      default = { 'lsp', 'path', 'snippets', 'lazydev' },
-      providers = { lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 } },
-    },
+    sources = require('custom.completion').sources,
 
     snippets = { preset = 'luasnip' },
 
