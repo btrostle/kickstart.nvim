@@ -668,6 +668,9 @@ do
   -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
   -- and elegantly composed help section, `:help lsp-vs-treesitter`
 
+  vim.pack.add { gh 'folke/lazydev.nvim' }
+  require('lazydev').setup { library = { { path = '${3rd}/luv/library', words = { 'vim%.uv' } } } }
+
   -- Useful status updates for LSP.
   vim.pack.add { gh 'j-hui/fidget.nvim' }
   require('fidget').setup {}
@@ -927,7 +930,8 @@ do
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets' },
+      default = { 'lsp', 'path', 'snippets', 'lazydev' },
+      providers = { lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 } },
     },
 
     snippets = { preset = 'luasnip' },
