@@ -140,8 +140,9 @@ do
   -- Decrease update time
   vim.o.updatetime = 250
 
-  -- Decrease mapped sequence wait time
-  vim.o.timeoutlen = 300
+  -- Wait for mapped key sequences until they are completed or canceled.
+  vim.o.timeout = false
+  vim.o.ttimeout = true
 
   -- Configure how new splits should be opened
   vim.o.splitright = true
