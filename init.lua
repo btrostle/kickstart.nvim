@@ -525,6 +525,8 @@ do
     gh 'nvim-lua/plenary.nvim',
     gh 'nvim-telescope/telescope.nvim',
     gh 'nvim-telescope/telescope-ui-select.nvim',
+    gh 'nvim-telescope/telescope-file-browser.nvim',
+    gh 'nvim-tree/nvim-web-devicons',
   }
   if vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
 
@@ -550,6 +552,15 @@ do
   -- Enable Telescope extensions if they are installed
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
+  pcall(require('telescope').load_extension, 'file_browser')
+  vim.keymap.set('n', '<leader>fb', function()
+    require('telescope').extensions.file_browser.file_browser {
+      path = vim.fn.expand '%:p:h',
+      hidden = true,
+      grouped = true,
+      respect_gitignore = false,
+    }
+  end, { desc = '[F]ile [B]rowser' })
 
   -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
