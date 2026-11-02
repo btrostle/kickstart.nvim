@@ -424,7 +424,7 @@ do
   -- change the command under that to load whatever the name of that colorscheme is.
   --
   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  vim.pack.add { gh 'neanias/everforest-nvim' }
+  vim.pack.add { gh 'neanias/everforest-nvim', gh 'tpope/vim-commentary' }
   ---@diagnostic disable-next-line: missing-fields
   require('everforest').setup {
     background = 'hard',
